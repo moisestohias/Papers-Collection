@@ -1,0 +1,1909 @@
+Applied Intelligence
+https://doi.org/10.1007/s10489-020-02044-0
+
+Multilinear subspace learning using handcrafted and deep features
+for face kinship veriﬁcation in the wild
+Mohcene Bessaoudi1 · Ammar Chouchane2 · Abdelmalik Ouamane1 · Elhocine Boutellaa3
+Accepted: 26 October 2020
+© Springer Science+Business Media, LLC, part of Springer Nature 2020
+
+Abstract
+In this paper, we propose a new multilinear and multiview subspace learning method called Tensor Cross-view Quadratic
+Discriminant Analysis for face kinship verification in the wild. Most of the existing multilinear subspace learning methods
+straightforwardly focus on learning a single set of projection matrices, making it difficult to separate different classes.
+To address this issue, the proposed approach mutually learns multi-view representations for multidimensional cross-view
+matching. In order to decrease the effect of the within class variations for each mode of the tensor data, the proposed
+approach integrates the Within Class Covariance Normalization. Moreover, we propose a new tensor face descriptor based
+on the Gabor wavelets. Besides, we investigate the complementarity of handcrafted and deep face tensor features via their
+fusion at score level using the Logistic Regression method. Our extensive experiments demonstrate that the proposed kinship
+verification framework outperforms the state of the art, achieving 95.14%, 91.83% and 93.58% verification accuracies on
+Cornell KinFace, UB KinFace and TSKinFace face kinship datasets, respectively.
+Keywords Kinship verification · Multilinear subspace learning · Multi-view representation · Tensors · local features ·
+Hist-Gabor.
+
+1 Introduction
+Nowadays, automatic kinship verification from human face
+images is one of the most challenging research topics.
+The goal of kinship verification is to check the existence of a particular relationship between two individuals
+by visually comparing their facial appearances [5, 9, 12,
+13, 46]. Checking human kin relationship based on faces
+is challenging because of the high level of appearance
+variability due to several effects such as hereditary contrast, gender distinction and age gap. There are numerous
+interesting real life applications for kinship verification
+such as family photographs organization, finding missing
+relatives, forestalling child trafficking, etc. Video surveillance and tracking systems are typical systems where the
+face-based family relationship checking can be deployed. In
+ Mohcene Bessaoudi
+
+bessaoudi.mohcene@gmail.com
+1
+
+Laboratory of LI3C, University of Biskra, Biskra, Algeria
+
+2
+
+University of Yahia Fares Medea, Médéa, Algeria
+
+3
+
+Telecommunication division, Centre de Développement
+des Technologies Avancées, Algiers, Algeria
+
+spite of the fact that a DNA test is the most exact approach
+for kinship verification [15], it lamentably cannot be utilized
+in several situations. Hence, face based kinship verification
+emerges as a potential alternative compared to the DNA.
+Various computer vision approaches have been proposed to
+address the kinship verification challenge. Among the most
+viable literature works are learning-based methods such as
+metric learning [28], multi-metric learning [38], multilinear subspace learning [3]. Metric learning approaches have
+attained a satisfactory performance as demonstrated by [18,
+21, 22, 24, 27, 28, 45]. These approaches are based on learning an appropriate discriminative metric depending on the
+provided data, which creates some restrictions. Additionally, such approaches neglect the complementary information, which can be provided by different features, resulting
+in weak performances when fusing these features. To overcome this limitations, other researches [16, 28, 29, 38],
+proposed the multi-metric learning approaches which learn
+multiple distance metrics for different types features at the
+same time. Nevertheless, multi-metric learning approaches
+cannot maintain the view specific properties and usually fail
+addressing the dilemma of the small sample size problem.
+Recently, inspired by the significant achievement of
+multilinear subspace learning algorithms based on tensor
+
+M. Bessaoudi et al.
+
+modeling of data in different face analysis applications [2,
+25, 26, 32, 39, 43], some researchers have been able
+to improve the kinship verification accuracy through the
+representation of face images as high order tensors and
+the application of multilinear subspace learning approaches.
+Examples of such approaches include Multilinear SideInformation based Discriminant Analysis [3] and Tensor
+Cross-view Quadratic Discriminant Analysis [17].
+Motivated by the success of the multilinear analysis, our work presents a new tensor subspace learning
+method, Tensor Cross-view Quadratic Discriminant Analysis integrating the Within Class Covariance Normalization (TXQDAWCCN ), for tackling the problem of kinship
+verification in unconstrained environments. Specifically, a
+bunch of hybrid features, Hist-Gabor, Local phase quantization Binarized Statistical Image Features (LPQ+BSIf) and
+Visual Geometry Group (VGG) Face [34], are extracted
+from the face image. Each of these features provides a tensor representation of the face image. The proposed method
+TXQDAWCCN aims to project the face tensor representation into a new discriminative subspace, in which the margin
+of each face pair with a kin relation is reduced and that
+of each negative pair (no kin relation) is enlarged. To further enhance the kinship verification accuracies, we fuse the
+results from different types of features at score level.
+The key contributions of the proposed framework for
+face based kinship verification with their motivations are the
+following:
+
+We extensively evaluate the proposed approach and compare it against the state-of-the-art methods on three challenging kinship databases, namely Cornell KinFace, UB
+KinFace and TSKinFace. Our method achieves high verification performances pointing out promising perspectives for
+our contributions.
+The remainder of this paper is organized as follows. The
+proposed face kinship verification framework as well as
+the mathematical details of our algorithm are presented in
+Section 2. Experimental results on different databases and
+discussions are provided in Section 3. Finally, concluding
+remarks and future work are drawn in Section 4.
+
+1. We propose a new multilinear subspace approach for
+kinship verification, TXQDAWCCN , based on multidimensional representation of face data. The kinship
+problem is modeled as a multilinear cross-view matching problem where the two face images of two different
+persons are seen as the two views of the kin relation. To
+reduce the class intra-variability impact, due to the big
+differences between the views, we apply WCCN.
+2. We propose a new discriminative handcrafted face
+descriptor, Hist-Gabor, based on histograms of basic
+Gabor wavelets. To encode the face structure, the Gabor
+wavelets images are subdivided into several blocks.
+Taking advantage of the histogram features which
+considers the microstructures information such as plane
+area, spots and edges, the histograms of the face blocks
+concatenated, creating an enhanced feature vector.
+3. Aiming to benefit from multiple face descriptors, we perform Logistic Regression (LR) score level fusion. This
+fusion scheme combines two handcrafted features, HistGabor and (LPQ+BSIf), and a deep feature, VGG-Face,
+to exploit their complementarity. To the best of our
+knowledge, the proposed approach is the first one that
+takes the advantage of the discrimination power of three
+types of features for the kinship verification problem.
+
+Feature extraction is known to be one of the most
+crucial operations in face verification systems. The feature
+extraction step gives us with a feature vector or a
+feature matrix for each element in the database, which is
+considered to be the biometric signature of this element.
+In our system, two kinds, handcrafted and Deep, of wellestablished features are used. Regarding the handcrafted
+features, we use three methods, basic Gabor wavelets [7,
+41], combination between the best two local descriptors [3,
+17, 32] local phase quantization (LPQ) [31] and binarized
+statistical image feature (BSIf) [14] as well as our new
+feature extraction method named Hist-Gabor. For the Deep
+features, we utilize VGG-Face [34] network as feature
+extractor. The VGG-Face descriptor is a pre-trained face
+verification Convolutional Neural Network (CNN). VGGFace is trained on over 2.6 million face images from 2622
+different persons. Though the network is trained for identity
+verification, it has been successfully adopted as a generic
+face descriptor for many face analysis problems [4]. The
+input of the network is an RGB face image with size
+224 × 224 pixels. Its layers are composed of a sequence
+of convolutional, pooling, and fully-Connected layers and
+followed by a Soft-Max layer. Each convolutional layer is
+followed by a relu activation function layer.
+
+2 Proposed multilinear framework
+for kinship veriﬁcation
+In this section, we present the details of the proposed
+TXQDAWCCN for kinship verification based on multidimensional cross-view matching of pairs of facial images.
+As illustrated in Fig. 1. Our framework encompasses four
+important steps: feature extraction, multilinear subspace
+learning using TXQDAWCCN , comparison (Cosine similarity) and LR score fusion. More information about each step
+is given below.
+
+2.1 Feature extraction
+
+Multilinear subspace learning using handcrafted...
+
+Fig. 1 The proposed pipeline for face kinship verification
+
+2.1.1 Hist-Gabor face descriptor
+The Gabor wavelets [19] is considered as one of the most
+widely used descriptors in the field of computer vision [40].
+It is based on the application of a number of linear filters
+aiming to capture the image characteristics at different
+scales and orientations. Usually, the Gabor filter extracts the
+image frequency and spatial information from five scales
+(frequencies) and eight orientations (directions). The Gabor
+transformation is be obtained through the convolution
+between Gabor kernels G (a, b) and the input image I(x,
+y). Fig. 2 illustrates the result of the application of 40
+Gabor filters, five scales and eight orientations, on a facial
+image [20]. The mathematical formulation of Gabor filter is
+as follow:
+
+G(a, b) =
+
+1
+2π σa σb
+
+
+
+
+
+
+
+1
+a2
+b2
+exp −
++
+2 π σa2
+π σb2
+
+
++2π jW(z0 a + y0 b)
+
+(1)
+
+where W represents the center frequency in the Fourier
+domain, (z0 , y0 ) is the position of the Gabor filter. σa and
+σb are the variance of Gabor filter along a and b orientations, respectively.The multi-directionality and resolution
+can be acquired by rotating and scaling G(a, b):
+Gm,n (a, b) = r−m G(a , b )
+r−m (a cos 
+
+(2)
+r−m (−a sin +
+
+where á =
++ b sin ), b́ =
+b cos ); r−m represents the frequency factor, m=(0,1,...,S)
+denotes the scaling parameter, S represents the number of
+frequencies,  = nπ/k, and n(n = 1, 2,..., K) denotes
+direction parameter, K represents the number of directions.
+Gm,n (a, b) is called Gabor wavelets.
+The basic idea of the proposed Hist-Gabor is to represent
+the face image as depicted in Fig. 3. First, the input face
+image is convolved with the Gabor filter G(a,b) yielding
+the wavelets coefficients which describe the face texture
+at scale a and orientation b. The coefficients matrix is
+subdivided into k non-overlapping blocks, and each block
+is summarized into a histogram of 256 bins, then the
+histograms of different blocks are concatenated into a single
+vector, of size k × 256, which describes the coefficients
+matrix. This process is applied to the result of each Gabor
+
+M. Bessaoudi et al.
+Fig. 2 Gabor wavelets
+decomposition of a face image
+using 5 frequencies and 8
+orientations
+
+filter yielding a × b feature vectors. Finally, these feature
+vectors are arranged in a matrix forming the new Hist-Gabor
+face image descriptor.
+
+2.2 Proposed TXQDAWCCN multilinear subspace
+learning
+For a better readability of the equations in this paper, we
+define a specific symbolic notation for different data types
+as described in Table 1.
+Based on the these notations, the mathematical formulation of the proposed multilinear subspace learning is
+presented below.
+TXQDA is considered as an extension of the linear
+XQDA [23] approach so that it works on high order tensors
+data. Thus, TXQDA seeks projecting the input tensors
+
+Fig. 3 Overview of the proposed Hist-Gabor face descriptor
+
+data to a new lower-dimensional subspace, where most the
+data variations in the original tensors is conserved. Let the
+cross-view training samples {A, B} of c classes, represented
+as the mth -order tensors, where: A ∈ RI1 ×I2 ×···×Im ×x ,
+comprises x samples of the first view (Parents) and B ∈
+RI1 ×I2 ×···×Im ×y comprises y samples of the second view
+(Children). TXQDA determines m interrelated projection
+´
+´
+´
+matrices (U1 ∈ RI1 ×I1 , U2 ∈ RI2 ×I2 ,..., Um ∈ RIm ×Im ).
+Therefore, the objective function of XQDA [23] which
+corresponds to maximizing the covariance matrix VIk while
+minimizing the covariance matrix VEk in each mode of the
+training tensor:
+
+J(U∗k )
+
+
+T race UTk VEk Uk
+
+= argmaxUK
+T race UTk VIk Uk
+
+(3)
+
+Multilinear subspace learning using handcrafted...
+Table 1 Respected notations
+
+where
+
+Notation
+
+Description
+
+Lowercase and uppercase symbols (eg. x, y, J, K)
+Bold lowercase symbols (eg. x, y)
+Italic uppercase symbols (eg. U, W)
+Bold italic uppercase symbols
+(eg. X, Y)
+A ∈ RI1 ×I2 ×···×Im
+Im
+A ×k U
+
+Scalars
+
+K,P
+K,P
+K,P
+AK,P = aK,P
+1 , a2 , .., ax1 , ..., ax
+
+K,P
+K,P
+B K,P = b1K,P , bK,P
+2 , .., by1 , ..., by
+
+Vectors
+Matrices
+High order Tensors
+mth -order tensor
+Dimension of the m-mode
+K-mode product
+
+nI VIk,P , nI VIk,P
+p=1
+
+= AK,P AK,P
+
+T
+
+−F K,P M K,P
+where
+AK,P =
+B K,P
+
+B K,P B K,P
+T
+
+T
+
+− M K,P F K,P
+
+T
+(4)
+
+√ k,p
+√ k,p 
+√ k,p √ k,p
+y1 a1 , y1 a2 , ..., y1 ax1 , ..., yc ax
+(5)
+
+√ k,p √ k,p √ k,p
+√ k,p
+=
+x1 b1 , x1 b2 , ... x1 by1 , ..., xc by
+⎛
+k,p
+
+Di=1
+
+k,p
+ai ⎠
+
+k,p
+
+ai ,
+
+ai , ..,
+Di=2
+
+(6)
+
+⎞
+
+F K,P = ⎝
+
+k,p
+bi ⎠
+
+bi k,p ,
+Hi=1
+
+(7)
+
+Di=c
+
+⎛
+bi k,p , ..,
+Hi=2
+
+(8)
+
+Hi=c
+
+c
+
+nI =
+
+xi × yi
+
+(9)
+k,p
+bi
+
+and
+are the pth column
+In the above equations,
+vectors of the k-mode flattening matrix Ak and B k of the
+tensor samples A and B, respectively. xi and yi are the
+number of samples in class i of A and B, respectively. Di
+and Hi are class labels.
+o =kIo
+
+nE VEk
+
+aiK,P
+
+nE VEk,P , nE VEk,P
+
+=
+p=1
+
+T
+
+(14)
+
+j=1
+
+(15)
+nE = np × nc − nI
+where, np and nc represent the number of parents and
+children, respectively. The optimization problem in (3)
+is a higher order nonlinear optimization problem with
+a higher order nonlinear constraint. Therefore, finding a
+straightforward closed solution is not clear. Hence, an
+iterative optimization approach to estimate the interrelated
+discriminative subspaces is proposed [39]. In each iteration
+UK , K = 1,..., m are first initialized to identity. letting:
+S
+=
+A ×1 U1 itr−1 · · · ×k−1 Uk−1 itr−1 ×k+1
+itr−1
+Uk+1
+· · · ×m Umitr−1 and V = B ×1 U1 itr−1 · · · ×k−1
+itr−1
+Uk−1
+×k+1 Uk+1 itr−1 · · · ×m Umitr−1 are substituted in
+(3) via changing A and B by S and V.The new equation can
+be solved for each k-mode via eigenvectors decomposition
+as follows:
+(16)
+
+where, U k represents the eigenvectors matrix and Λk
+represents the eigenvalues matrix.
+The Within-Class Covariance Normalization (WCCN)
+technique has been exploited for the first time by the
+community of speaker recognition, where Dehak et al. [6]
+demonstrated the utility of mapping the reduced vectors
+of LDA algorithm [33] to a novel subspace through the
+within-class covariance matrix. WCCN decreases the effect
+of the within class variations, thereby reducing the expected
+classification error in training data [1]. Here, we propose a
+variant of TXQDA which integrates WCCN as follows:
+nj
+k
+
+Wk =
+
+k
+UTk Sj,i
+− UTk S j
+
+
+
+
+k T
+
+k
+UTk Sj,i
+− UTk S j
+
+where, U k is the TXQDA projection matrix for each
+k
+k-mode found in (16), S j is the average matrix of class
+j samples. The WCCN projection matrix Zk is obtained
+through Cholesky decomposition [11, 42] of the inverse of
+Wk as follow:
+
+where our new projection matrix
+by:
+(10)
+
+(17)
+
+j=1 i=1
+
+Wk−1 = Zk ZkT
+
+T
+
+= yAK,P AK,P + xB K,P B K,P
+T
+T
+− mK,P fK,P − fK,P mK,P − nI VI
+
+(13)
+
+bK,P
+j
+
+fK,P =
+
+C
+
+i=1
+k,p
+ai
+
+(12)
+
+VEk U k = Λk VIk Uk
+
+
+
+⎞
+
+M K,P = ⎝
+
+
+
+yi=1
+
+o =kIo
+
+=
+
+(11)
+
+x
+
+mK,P =
+
+The two covariance matrices VEk and VIk for each k mode
+are computed using (4) and (10).
+nI VIk
+
+
+
+TXQDAWCCN
+
+Uk
+
+= ZkT Uk
+
+(18)
+TXQDAWCCN
+Uk
+
+is obtained
+(19)
+
+M. Bessaoudi et al.
+
+The optimization of TXQDAWCCN method is performed
+iteratively and it breaks up on the achievement of one of the
+following
+conditions: i) the iterations number is reached or
+ TXQDA
+TXQDAWCCNitr-1 
+
+WCCNitr
+ii) Uk
+− Uk
+ < Ik × Ik × .
+
+The entire procedure of the Tensor Cross-view Quadratic
+Discriminant Analysis integrating the within class covariance normalization TXQDAWCCN is provided in the algorithm 1.
+
+2.3 Multilinear subspace transformation based on
+TXQDAWCCN
+
+–
+
+Mode-2 stores: different (scales + orientations) for basic
+Gabor wavelets and Hist-Gabor, multi descriptors for
+LPQ+BSIf, and different layers for VGG-Face.
+
+–
+
+Mode-3 is employed to arrange the face samples in the
+dataset.
+
+In the training step, we create two 3rd order tensors A, B ∈
+RI1 ×I2 ××I3 , A and B correspond to view 1 (Parents) and
+view 2 (Children), respectively. Each face image in the data
+sets is represented by a feature matrix as illustrated in Fig. 1.
+Mode-1 and Mode-2 of the training tensors correspond to
+rows and columns of this feature matrix, in which,
+–
+
+Mode-1 is a feature vector resulted from one of each
+four descriptors mentioned previously (basic Gabor
+wavelets, hist-Gabor, LPQ+BSIf and VGG-Face).
+
+During the training phase, the optimal multilinear
+transformation matrices are estimated for each of tensor
+modes. In the test phase, the novel samples are projected
+using these transformation matrices before matching. The
+two training tensors A and B are projected in a new subspace
+based on TXQDAWCCN . Consequently, the dimensions in
+each input tensors are reduced according to I1 and I2
+
+Multilinear subspace learning using handcrafted...
+
+modes; the third dimension I3 remains the same because
+it represents the samples of the database. Therefore, new
+reduced and discriminative tensors are obtained, where Í1 ×
+Í2 << I1 × I2 . The test images passes through the similar
+stages as in the training phase. Firstly, the feature extraction
+is performed, after that, the test faces are projected into a
+new multilinear subspace based on TXQDAWCCN . Finally,
+the cosine similarity [30] is used to examine whether the
+pair belonging to the same family or not (kin or not-kin).
+The cosine similarity of two feature vectors vt1 and vt2 in
+the TXQDAWCCN subspace is defined as follows:
+ai = cos(vt1 , vt2 ) =
+
+vTt1 .vt2
+vt1 .vt2 
+
+–
+
+–
+
+(20)
+
+2.4 Logistic regression based score level fusion
+We adopt a score-level fusion strategy to take advantage
+of combining the similarity scores exploiting the complementarity of the two feature types aiming to increase the
+accuracies. For this purpose, Logistic Regression (LR) [10]
+is used in our framework. We select the logistic regression
+method because it has achieved interesting fusion improvements. The LR performs a simple decision based on an
+hyperplane and it converges around a global optimal solution. By taking the scores ai as the input, the generated
+probability (output) bi is defined as follow:
+bi = (1 + exp(xai + y))−1
+
+(21)
+
+where x is a scalar factor and y is a bias.
+
+3 Experiments
+In order to evaluate and assess the effectiveness of our
+approach, in this section, we conduct several experiments on
+three benchmark kinship datasets, namely Cornell Kinface,
+UB KinFace and TSKinface. In the following, we first introduce the three datasets used in our experiments. Then, we
+present the experimental protocol and parameters settings
+and detail the experimental results with their analysis. The
+performances of the proposed approach are evaluated separately based on VGG-Face, (LPQ+BSIf), basic Gabor, HistGabor as well as their combinations via LR score fusion.
+Finally, our best results are compared with the state of art.
+
+3.1 Datasets
+–
+
+Cornell KinFace database [8] contains 150 parentchild face image pairs, encompassing the four kinship
+relations. These face images are collected from the
+web. Due to privacy issues, seven families (parent–child
+pairs) have been taken out from the dataset. Thus, there
+
+are totally 286 RGB cropped face images with size
+100 × 100 pixels.
+UB KinFace database [36] contains 600 images of
+400 unique subjects, divided into 200 groups of childyoung parent (set 1) and 200 groups of child-old parent
+(set 2). Most of face images in the database are trueworld combinations collected from the internet. It is
+considered as the first dataset, which takes a new view
+of kinship verification problem (young and old face
+images of parents).
+TSKinFace database [35] is among the biggest existing kinship databases. It contains 4060 face images with
+two kinds of three subject kinship relations: FatherMother-Son (FM-S) and Father-Mother-Daughter (FMD). The FM-S comprises 513 relations and FM-D has
+502 relations. Since we deal with pair matching, we
+reorganized the database by splitting the group of FM-S
+into two subsets Father-Son (F-S) and Mother-Son (M-S)
+relations and the group of FM-D into two subsets FatherDaughter (F-D) and Mother-Daughter (M-D) relations.
+
+3.2 Experimental protocol
+For a fair the evaluation of our method, we follow the same
+protocol as the stat of the art [28, 37, 38], in which five
+folds with cross-validation strategy is used. This protocol
+is adopted to ensure that our results are straightforwardly
+comparable to the previous works in kinship verification.
+Each fold contains almost a similar number of face pairs.
+The positive pairs are predefined by the dataset collectors
+while the negative pairs generated via combination of a
+parent image and are randomly selected image from the set
+of children images from which the current parent’s children
+images are omitted.
+
+3.3 Parameters settings
+All the face images are aligned then cropped into 126 × 115
+pixels, 96 × 89 pixels and 64 × 64 pixels for Cornell
+KinFace, UB KinFace and TSKinface datasets, respectively.
+The face images corresponding to each pair are processed
+according to our proposed kinship verification scheme in
+order to extract the handcrafted and deep features. For
+the description of face image, four types of features with
+different parameters are extracted:
+–
+
+Hist-Gabor: To optimize our new descriptor, we have
+tested several combinations among the responses of 40
+Gabor filters.
+√ We found the magnitude at 2 frequencies
+(v = 8, 8 2) and 3 orientations (θ = π/8, π/4, 3π/8)
+to perform enough well. As described in Section 2.1.1,
+we apply these 6 Gabor filters on the face image and
+each resulting image is divided into 14 blocks whose
+
+M. Bessaoudi et al.
+Table 2 The verification accuracies (%) of TXQDA and TXQDAWCCN using different features and their fusion on TSKinFace database
+Type of Features
+
+Basic Gabor
+Hist-Gabor
+(LPQ+BSIf)
+VGG-Face
+Hist-Gabor+(LPQ+BSIf)
+Hist-Gabor+VGG-Face
+(LPQ+BSIf)+VGG-Face
+Basic Gabor+(LPQ+BSIf)+VGG-Face
+Hist Gabor+(LPQ+BSIf)+VGG-Face
+
+–
+
+–
+
+–
+
+TXQDA
+
+TXQDAWCCN
+
+FS
+
+FD
+
+MS
+
+MD
+
+Mean
+
+FS
+
+FD
+
+MS
+
+MD
+
+Mean
+
+65.05
+84.85
+87.86
+71.07
+90.58
+86.70
+87.77
+87.67
+90.78
+
+64.06
+85.45
+87.72
+71.98
+90.79
+87.33
+87.82
+88.12
+90.89
+
+63.30
+84.56
+88.45
+71.46
+90.58
+86.02
+88.25
+88.06
+90.68
+
+62.60
+85.91
+87.99
+73.01
+90.47
+86.71
+87.98
+88.79
+90.47
+
+63.75
+85.19
+88.00
+71.88
+90.60
+86.69
+91.75
+88.16
+90.70
+
+70.00
+91.17
+91.36
+77.38
+93.11
+92.52
+92.48
+91.65
+93.50
+
+68.51
+89.80
+92.48
+78.12
+92.48
+91.58
+92.80
+92.08
+93.47
+
+72.14
+89.71
+92.82
+79.32
+93.40
+92.72
+93.05
+92.82
+93.79
+
+69.94
+89.78
+92.76
+80.06
+92.86
+91.27
+92.52
+93.16
+93.55
+
+70.15
+90.12
+92.35
+78.72
+92.96
+92.02
+88.09
+92.43
+93.58
+
+histograms are concatenated in a feature vector. The
+vectors of the six components construct a feature matrix
+of dimension 4096 × 6.
+Basic Gabor: For fair comparison, we keep the same
+parameters as Hist-Gabor but without the subdivision
+of the images and without computing the histograms.
+Instead, each component is vectorized to get one feature
+vector. Then, all feature vectors are concatenated to get
+a feature matrix of dimension d × 6, where d is the
+number of the image pixels.
+LPQ+BSIf: For handcrafted features, we extract one
+scale for each descriptor, LPQ with a window of size
+M=3 and BSIf with learnt filters of size l=5, and
+divide each face image into 24 blocks. Then, each of
+the 24 blocks is summarized into a histogram of 256
+bins and the histograms are concatenated in a feature
+vector of size 6144. We employ the two feature vectors,
+resulting from LPQ and BSIf, to build a feature matrix
+of dimension 6144 × 2.
+VGG-Face: as deep features, we extract the features
+from the face image of size 224 × 224 × 3 using 4
+
+layers of VGG-Face network: fc6, relu6, fc7 and relu7.
+The four vectors construct a feature matrix of dimension
+4096 × 4.
+
+3.4 Results and discussion
+The evaluation results of the proposed TXQDA and
+TXQDAWCCN using single features and the LR fusion of
+their combinations are shown in Tables 2, 3 and 4 for the
+three benchmark kinship datasets. These results outline four
+principal observations which are detailed in the following.
+3.4.1 The proposed Hist-Gabor outperforms the basic Gabor
+We can observe a significant weakness in the discrimination
+power of the basic Gabor method compared with the
+proposed Hist-Gabor on the three databases. To be specific,
+compared to the basic Gabor, the proposed Hist-Gabor
+attains an accuracy improvement of 19.70%, 33.34% and
+29.48% on TSKinFace, Cornell KinFace and UB kinface
+datasets, respectively (see Tables 2 to 4). These results
+
+Table 3 The verification accuracies (%) of TXQDA and TXQDAWCCN using different features and their fusion on the UB KinFace database
+Type of Features
+
+Basic Gabor
+Hist-Gabor
+(LPQ+BSIf)
+VGG-Face
+Hist-Gabor+(LPQ+BSIf)
+Hist-Gabor+VGG-Face
+(LPQ+BSIf)+VGG-Face
+Basic Gabor+(LPQ+BSIf)+VGG-Face
+Hist Gabor+(LPQ+BSIf)+VGG-Face
+
+TXQDA
+
+TXQDAWCCN
+
+Set1
+
+Set2
+
+Mean
+
+Set1
+
+Set2
+
+Mean
+
+56.28
+87.45
+86.90
+87.86
+89.92
+89.85
+89.36
+89.37
+90.61
+
+55.36
+88.25
+87.47
+85.43
+90.78
+90.24
+90.70
+91.23
+92.73
+
+55.82
+87.85
+87.18
+86.64
+90.35
+90.04
+90.03
+90.30
+91.67
+
+58.48
+88.45
+88.20
+88.39
+89.18
+90.90
+90.65
+90.67
+90.91
+
+60.53
+89.52
+89.51
+86.21
+91.02
+91.76
+91.23
+92.25
+92.76
+
+59.50
+88.98
+88.85
+87.30
+90.10
+91.33
+90.94
+91.46
+91.83
+
+Multilinear subspace learning using handcrafted...
+
+Type of Features
+
+TXQDA
+Mean
+
+TXQDAWCCN
+Mean
+
+Basic Gabor
+Hist-Gabor
+(LPQ+BSIf)
+VGG-Face
+Hist-Gabor+(LPQ+BSIf)
+Hist-Gabor+VGG-Face
+(LPQ+BSIf)+VGG-Face
+Basic Gabor+(LPQ+BSIf)+VGG-Face
+Hist Gabor+(LPQ+BSIf)+VGG-Face
+
+55.23
+89.24
+91.33
+89.62
+92.43
+93.46
+93.39
+93.41
+94.87
+
+57.62
+90.96
+92.37
+91.02
+92.72
+94.18
+94.41
+94.81
+95.14
+
+1
+
+1
+
+0.9
+
+0.9
+
+0.8
+
+0.8
+
+0.7
+
+True positive rate
+
+True positive rate
+
+Table 4 The verification
+accuracies (%) of TXQDA and
+TXQDAWCCN using different
+features, and their fusion on the
+Cornell KinFace database
+
+Simple Gabor+TXQDA
+Hist Gabor+TXQDA
+(LPQ+BSIF)+TXQDA
+VGG+TXQDA
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA
+Simple Gabor+TXQDAWCCN
+
+0.6
+0.5
+0.4
+0.3
+
+Hist Gabor+TXQDAWCCN
+(LPQ+BSIF)+TXQDAWCCN
+
+0.2
+
+Simple Gabor+TXQDA
+Hist Gabor+TXQDA
+(LPQ+BSIF)+TXQDA
+VGG+TXQDA
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA
+Simple Gabor+TXQDAWCCN
+
+0.6
+0.5
+0.4
+0.3
+
+Hist Gabor+TXQDAWCCN
+(LPQ+BSIF)+TXQDAWCCN
+
+0.2
+
+VGG+TXQDAWCCN
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0.1
+
+0.7
+
+VGG+TXQDAWCCN
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0.1
+
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0
+
+0
+0.1
+
+0.2
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+0.8
+
+0.9
+
+0
+
+1
+
+0.1
+
+0.2
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+False positive rate
+
+False positive rate
+
+(a)
+
+(b)
+
+1
+
+1
+
+0.9
+
+0.9
+
+0.8
+
+0.8
+
+0.7
+
+0.7
+
+True positive rate
+
+True positive rate
+
+0
+
+Simple Gabor+TXQDA
+Hist Gabor+TXQDA
+(LPQ+BSIF)+TXQDA
+VGG+TXQDA
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA
+Simple Gabor+TXQDAWCCN
+
+0.6
+0.5
+0.4
+0.3
+
+Hist Gabor+TXQDAWCCN
+(LPQ+BSIF)+TXQDAWCCN
+
+0.2
+
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0.1
+
+0.8
+
+0.9
+
+1
+
+Simple Gabor+TXQDA
+Hist Gabor+TXQDA
+(LPQ+BSIF)+TXQDA
+VGG+TXQDA
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA
+Simple Gabor+TXQDAWCCN
+
+0.6
+0.5
+0.4
+0.3
+
+Hist Gabor+TXQDAWCCN
+(LPQ+BSIF)+TXQDAWCCN
+
+0.2
+
+VGG+TXQDAWCCN
+
+0.7
+
+VGG+TXQDAWCCN
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0.1
+
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0
+
+0
+
+0
+
+0.1
+
+0.2
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+0.8
+
+0.9
+
+1
+
+0
+
+0.1
+
+0.2
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+False positive rate
+
+False positive rate
+
+(c)
+
+(d)
+
+0.7
+
+0.8
+
+0.9
+
+1
+
+Fig. 4 ROC curves of TXQDA vs.TXQDAWCCN using different features and their fusion on TSKinFace. a F-S set, b F-D set, c M-S set and d
+M-D set
+
+1
+
+1
+
+0.9
+
+0.9
+
+0.8
+
+0.8
+
+0.7
+
+0.7
+
+true positive rate
+
+true positive rate
+
+M. Bessaoudi et al.
+
+Simple Gabor+TXQDA
+Hist Gabor+TXQDA
+(LPQ+BSIF)+TXQDA
+VGG+TXQDA
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA
+Simple Gabor+TXQDAWCCN
+
+0.6
+0.5
+0.4
+0.3
+
+Hist Gabor+TXQDAWCCN
+(LPQ+BSIF)+TXQDAWCCN
+
+0.2
+
+0.5
+0.4
+0.3
+
+Hist Gabor+TXQDAWCCN
+(LPQ+BSIF)+TXQDAWCCN
+
+0.2
+
+VGG+TXQDAWCCN
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0.1
+
+Simple Gabor+TXQDA
+Hist Gabor+TXQDA
+(LPQ+BSIF)+TXQDA
+VGG+TXQDA
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA
+Simple Gabor+TXQDAWCCN
+
+0.6
+
+VGG+TXQDAWCCN
+Simple Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0.1
+
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+Hist Gabor+(LPQ+BSIF)+VGG+TXQDA WCCN
+
+0
+
+0
+0
+
+0.1
+
+0.2
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+0.8
+
+0.9
+
+1
+
+0
+
+0.1
+
+0.2
+
+0.3
+
+0.4
+
+0.5
+
+0.6
+
+false positive rate
+
+false positive rate
+
+(a)
+
+(b)
+
+0.7
+
+0.8
+
+0.9
+
+1
+
+Fig. 5 ROC curves of TXQDA vs.TXQDAWCCN using different features and their fusion on a Cornell KinFace b UB KinFace set 2
+
+confirm the utility of dividing the face image into a several
+blocks and taking their histograms as a discriminative
+biometric signature.
+
+a high performance of 93.58%, 95.14% and 92.17% on
+the UB kinface, Cornell Kinface and TSKinFace databases,
+respectively.
+
+3.4.2 WCCN improves the TXQDA performances
+
+3.4.4 VGG-Face features provide weak accuracies on small
+databases
+
+By comparing the results depicted in the Tables 2, 3 and 4,
+we can note that the proposed TXQDAWCCN outperforms
+TXQDA on the three databases. Thanks to WCCN,
+the within-class variations effect is decreased thereby
+reducing the predictable classification error. Indeed, the
+proposed TXQDAWCCN maps the extracted features into a
+discriminative subspace and providing more discrimination
+power and robustness to the features to be used in
+the comparison step. In our case, overall, TXQDAWCCN
+improves the accuracy of the basic TXQDA with a
+percentage of 2-5%.
+3.4.3 LR fusion enhances the results of single features
+For a better visualization and easier comparison of different experimental configurations, the Receiving Operating
+Characteristic (ROC) Curves of different methods are plotted in Figs. 4 for the four relation of TSKinFace and in 5
+for Cornell and UB kinface databases. We can observe
+from these figures that LR fusion yields competitive performances than using each type of features alone in terms of
+ROC curves. This result is attributed to the fact that every
+feature contributes efficiently to the kinship verification system and the fusion of these contributions further improves
+the performances. It is worth noting that when we fuse the
+scores resulting from the three types of features (VGG-Face,
+Hist-Gabor and LPQ+BSIf), the LR fusion process reaches
+
+From our results (see Tables 2 and 4), we notice a relative
+weakness in the effectiveness of the VGG-Face features as
+in most of the cases they yield lower accuracies. Indeed, it is
+often realized that the deep CNN does not perform very well
+on small datasets such as those used in kinship verification.
+This result confirms the conclusion drawn by a previous
+work [44].
+
+3.5 Evaluation of time complexity
+To estimate the computational complexity of the proposed
+TXQDAWCCN for practical applications, we compute the
+CPU time needed to execute the algorithm for matching one
+pair of face image in the online stage. The utilized hardware
+configuration comprises an Intel Xeon(R) 3.19 GHz CPU
+and a 12 GB of RAM using Matlab R2018a. Table 5 lists
+the CPU time (in milliseconds) of our algorithm on all three
+evaluation databases. We see that the computational time for
+Table 5 Running time of the proposed algorithm on the three datasets
+Dataset
+
+CPU time
+
+TSKinFace
+UB KinFace
+Cornell KinFace
+
+4.97
+5.49
+6.09
+
+Multilinear subspace learning using handcrafted...
+Table 6 Comparison to state of
+the art on TSKinFace database
+
+Approach type
+
+Author
+
+Year
+
+Mean Accuracy (%)
+
+Lu et al. [27]
+Liang et al. [22]
+Laiadi et al. [18]
+Laiadi et al. [16]
+Bessaoudi et al. [3]
+Laiadi et al. [17]
+Proposed
+
+2017
+2018
+2018
+2019
+2019
+2020
+2020
+
+84.15
+90.47
+83.63
+88.59
+85.18
+90.32
+90.70
+
+Approach type
+
+Author
+
+Year
+
+Mean Accuracy (%)
+
+Metric Learning
+
+Lu et al. [28]
+Zhou al. [45]
+Lu et al. [28]
+Yan et al. [38]
+Bessaoudi et al. [3]
+Laiadi et al. [17]
+Proposed
+
+2014
+2018
+2014
+2014
+2019
+2020
+2020
+
+65.60
+75.50
+67.05
+72.25
+83.34
+91.53
+91.83
+
+Metric learning
+Multi metric learning
+Multilinear subspace learning
+
+Table 7 Comparison to state of
+the art on UB KinFace database
+
+Multi Metric Learning
+
+Multilinear subspace learning
+
+Table 8 Comparison to state of
+the art on Cornell KinFace
+database
+
+Approach type
+
+Metric learning
+
+Multi metric learning
+
+Multilinear subspace learning
+
+Table 9 Increase in average
+accuracy provided by
+TXQDAWCCN compared to the
+state of the art
+
+Approach type
+
+Metric learning
+
+Multi metric learning
+
+Multilinear subspace learning
+
+Author
+
+Year
+
+Mean Accuracy (%)
+
+Lu et al. [28]
+Zhou al. [45]
+Laiadi et al. [18]
+Lu et al. [28]
+Yan et al. [38]
+Mahpod et Keller [29]
+Bessaoudi et al. [3]
+Laiadi et al. [17]
+Proposed
+
+2014
+2018
+2018
+2014
+2014
+2017
+2019
+2020
+2020
+
+69.50
+81.40
+77.60
+71.60
+73.50
+76.60
+86.87
+93.04
+95.14
+
+Database
+
+Best method
+
+Increase in average
+accuracy (%)
+
+Cornell KinFace
+TSKinFace
+UB KinFace
+Cornell KinFace
+TSKinFace
+UB KinFace
+Cornell KinFace
+TSKinFace
+UB KinFace
+
+Zhou al. [45]
+Liang et al. [22]
+Zhou al. [45]
+Laiadi et al. [18]
+Laiadi et al. [16]
+Yan et al. [38]
+Laiadi et al. [17]
+Laiadi et al. [17]
+Laiadi et al. [17]
+
+13.74
+0.23
+16.33
+18.54
+02.11
+19.58
+2.10
+0.40
+0.30
+
+M. Bessaoudi et al.
+
+our approach using Hist Gabor+(LPQ+BSIf)+VGG-Face
+features is around 4.97 ms for TSKinFace, 5.49 ms for UB
+KinFace, and 6.09 ms for Cornell KinFace database. These
+experimental results confirm that the required verification
+time is only few milliseconds. Hence, demonstrating the
+feasibility and success of using our approach for real time
+face kinship verification applications.
+
+3.6 Comparison to the state of the art
+The best performance of the proposed method TXQDAWCCN
+with score fusion of Hist-Gabor, (LPQ+BSIf) and VGGFace is compared with recent related works in Table 6
+on TSKinFace database, in Table 7 on UB KinFace and
+in Table 8 on Cornell KinFace database. For comparison
+purpose, the recent related works, grouped according to
+three categories, metric, multi-metric and multilinear learning approaches, are reported. This comparison demonstrates
+that the proposed approach outperforms the state of the
+art on the three databases. Table 9 shows the increase in
+average accuracy provided by our method compared to the
+best method of each category. This table demonstrates the
+effectiveness of our method for kinship verification task.
+It is worth noting that we were able to considerably
+improve the kinship verification accuracy on the UB
+Kinface database. This database is considered as one of
+the hardest kinship verification databases. This is due to
+the fact that the pairs of face images of this database are
+not cropped from the same image, this means that the face
+pair images are not captured under the same environment.
+In the literature, the best kinship verification accuracy on
+this database does not exceed 90%. Whereas, our proposed
+approach achieved an accuracy of 92.17% resulting from
+the LR scores fusion of the Hist-Gabor, (LPQ+BSIf) and
+VGG-Face features.
+
+4 Conclusion
+In this paper, we presented an efficient approach for
+face based kinship verification using handcrafted and deep
+tensor features. Besides exploiting two state-of-the-art face
+descriptors, we introduced a new face descriptor, HistGabor, based on the Gabor wavelets responses. To enhance
+the discrimination of the proposed multidimensional face
+representations, we have proposed TXQDAWCCN as a
+multilinear subspace learning method. TXQDAWCCN finds
+multiple interrelated projection matrices for mapping high
+order tensor data through exploiting combined traits of
+multi-view representation. This allows minimizing the
+variation of the within-class while maximizing the variation
+of the between-class from all views at the same time.
+
+The proposed Hist-Gabor achieves interesting performances compared with its counterpart basic Gabor method.
+The best performances of our approach are achieved by
+fusing the scores of the handcrafted and the deep tensor features using LR technique. Hence, our results confirm that
+handcrafted and deep features are complementary and their
+fusion greatly helps increasing the verification of kin relations accuracy. Moreover, the experimental part confirms
+that our approach TXQDAWCCN exhibits superior results
+over recently reported kinship verification methods on three
+challenging datasets. In future, we plan to enhance our
+method so that it able to handle the supervised and semi
+supervised scenarios in other face verification applications.
+
+References
+1. Barkan O, Weill J, Wolf L, Aronowitz H (2013) Fast high dimensional vector multiplication face recognition. In: Proceedings of
+the IEEE international conference on computer vision, pp. 1960–
+1967
+2. Bessaoudi M, Belahcene M, Ouamane A, Chouchane A,
+Bourennane S (2019) Multilinear enhanced fisher discriminant
+analysis for robust multimodal 2d and 3d face verification. Appl
+Intell 49(4):1339–1354
+3. Bessaoudi M, Ouamane A, Belahcene M, Chouchane A, Boutellaa
+E, Bourennane S (2019) Multilinear side-information based
+discriminant analysis for face and kinship verification in the wild.
+Neurocomputing 329:267–278
+4. Boutellaa E, López MB, Ait-Aoudia S, Feng X, Hadid A (2017)
+Kinship verification from videos using spatio-temporal texture
+features and deep learning
+5. Dal Martello MF, Maloney LT (2006) Where are kin recognition
+signals in the human face? J Vis 6(12):2–2
+6. Dehak N, Kenny PJ, Dehak R, Dumouchel P, Ouellet P (2010)
+Front-end factor analysis for speaker verification. IEEE Transactions on Audio Speech, and Language Processing 19(4):788–798
+7. Fang L, Li S (2015) Face recognition by exploiting local gabor
+features with multitask adaptive sparse representation. IEEE Trans
+Instrum Meas 64(10):2605–2615
+8. Fang R, Tang KD, Snavely N, Chen T (2010) Towards computational models of kinship verification. In: 2010 IEEE International
+conference on image processing, pp. 1577–1580. IEEE
+9. Guo G, Wang X (2012) Kinship measurement on salient facial
+features. IEEE Trans Instrum Meas 61(8):2322–2325
+10. Harrell Jr FE (2015) Regression modeling strategies: with
+applications to linear models, logistic and ordinal regression, and
+survival analysis Springer
+11. Iman RL, Conover WJ (1982) A distribution-free approach to
+inducing rank correlation among input variables. Communications
+in Statistics-Simulation and Computation 11(3):311–334
+12. Kaminski G, Dridi S, Graff C, Gentaz E (2009) Human ability
+to detect kinship in strangerb faces: effects of the degree of
+relatedness. Proc R Soc B Biol Sci 276(1670):3193–3200
+13. Kaminski G, Ravary F, Graff C, Gentaz E (2010) Firstborns’ disadvantage in kinship detection. Psychological science
+21(12):1746–1750
+14. Kannala J, Rahtu E (2012) Bsif: Binarized statistical image
+features. In: Proceedings of the 21st international conference on
+pattern recognition (ICPR2012), pp. 1363–1366. IEEE
+
+Multilinear subspace learning using handcrafted...
+15. Kofman A (2016) The troubling rise of rapid dna testing. goo
+gl/uuhZSN
+16. Laiadi O, Ouamane A, Benakcha A, Taleb-Ahmed A, Hadid A
+(2019) Learning multi-view deep and shallow features through
+new discriminative subspace for bi-subject and tri-subject kinship
+verification. Appl Intell 49(11):3894–3908
+17. Laiadi O, Ouamane A, Benakcha A, Taleb-Ahmed A, Hadid
+A (2020) Tensor cross-view quadratic discriminant analysis for
+kinship verification in the wild. Neurocomputing 377:286–300
+18. Laiadi O, Ouamane A, Boutellaa E, Benakcha A, Taleb-Ahmed
+A, Hadid A (2019) Kinship verification from face images in
+discriminative subspaces of color components. Multimedia Tools
+and Applications 78(12):16465–16487
+19. Lee TS (1996) Image representation using 2d gabor wavelets.
+IEEE Transactions on pattern analysis and machine intelligence
+18(10):959–971
+20. Li C, Huang Y, Xue Y (2019) Dependence structure of gabor
+wavelets based on copula for face recognition. Expert Syst Appl
+137:453–470
+21. Li W, Wu Y, Li J (2017) Re-identification by neighborhood
+structure metric learning. Pattern Recogn 61:327–338
+22. Liang J, Hu Q, Dang C, Zuo W (2018) Weighted graph
+embedding-based metric learning for kinship verification. IEEE
+Trans Image Process 28(3):1149–1162
+23. Liao S, Hu Y, Zhu X, Li SZ (2015) Person re-identification
+by local maximal occurrence representation and metric learning.
+In: Proceedings of the IEEE conference on computer vision and
+pattern recognition, pp. 2197–2206
+24. Liong VE, Lu J, Ge Y (2015) Regularized local metric learning
+for person re-identification. Pattern Recogn Lett 68:288–296
+25. Lu H, Plataniotis KN, Venetsanopoulos AN (2008) Mpca:
+Multilinear principal component analysis of tensor objects. IEEE
+transactions on Neural Networks 19(1):18–39
+26. Lu H, Plataniotis KN, Venetsanopoulos AN (2008) Uncorrelated
+multilinear discriminant analysis with regularization and aggregation for tensor object recognition. IEEE Transactions on Neural
+Networks 20(1):103–123
+27. Lu J, Hu J, Tan YP (2017) Discriminative deep metric learning
+for face and kinship verification. IEEE Trans Image Process
+26(9):4269–4282
+28. Lu J, Zhou X, Tan YP, Shang Y, Zhou J (2013) Neighborhood
+repulsed metric learning for kinship verification. IEEE transactions on pattern analysis and machine intelligence 36(2):331–345
+29. Mahpod S, Keller Y (2018) Kinship verification using multiview
+hybrid distance learning. Comput Vis Image Underst 167:28–36
+30. Nguyen HV, Bai L (2010) Cosine similarity metric learning
+for face verification. In: Asian conference on computer vision,
+pp. 709–720. Springer
+31. Ojansivu V, Heikkilä J. (2008) Blur insensitive texture classification using local phase quantization. In: International conference
+on image and signal processing, pp. 236–243. Springer
+
+32. Ouamane A, Chouchane A, Boutellaa E, Belahcene M, Bourennane S, Hadid A (2017) Efficient tensor-based 2d+ 3d face verification. IEEE Transactions on Information Forensics and Security
+12(11):2751–2762
+33. Pang Y, Wang S, Yuan Y (2014) Learning regularized lda by
+clustering. IEEE transactions on neural networks and learning
+systems 25(12):2191–2201
+34. Parkhi OM, Vedaldi A, Zisserman A (2015) Deep face recognition. In: British machine vision conference
+35. Qin X, Tan X, Chen S (2015) Tri-subject kinship verification:
+Understanding the core of a family. IEEE Transactions on
+Multimedia 17(10):1855–1867
+36. Xia S, Shao M, Luo J, Fu Y (2012) Understanding kin
+relationships in a photo. IEEE Transactions on Multimedia
+14(4):1046–1056
+37. Yan H (2017) Kinship verification using neighborhood repulsed
+correlation metric learning. Image Vis Comput 60:91–97
+38. Yan H, Lu J, Deng W, Zhou X (2014) Discriminative multimetric learning for kinship verification. IEEE Transactions on
+Information forensics and security 9(7):1169–1178
+39. Yan S, Xu D, Yang Q, Zhang L, Tang X, Zhang HJ (2006)
+Multilinear discriminant analysis for face recognition. IEEE Trans
+Image Process 16(1):212–220
+40. Yang D, Jiao L, Gong M, Liu F (2011) Artificial immune multiobjective sar image segmentation with fused complementary
+features. Inf Sci 181(13):2797–2812
+41. Yang Y, Sun J (2010) Face recognition based on gabor feature
+extraction and fractal coding. In: 2010 Third international
+symposium on electronic commerce and security, pp. 302–306.
+IEEE
+42. Yu H, Chung C, Wong K, Lee H, Zhang J (2009) Probabilistic
+load flow evaluation with hybrid latin hypercube sampling and
+cholesky decomposition. IEEE Transactions on Power Systems
+24(2):661–667
+43. Yuan S, Mao X, Chen L (2017) Multilinear spatial discriminant
+analysis for dimensionality reduction. IEEE Trans Image Process
+26(6):2669–2681
+44. Zhang L, Duan Q, Zhang D, Jia W, Wang x. (2020) Advkin:
+Adversarial convolutional network for kinship verification. IEEE
+Transactions on Cybernetics
+45. Zhou X, Jin K, Xu M, Guo G (2019) Learning deep compact
+similarity metric for kinship verification from face images.
+Information Fusion 48:84–94
+46. Zhou X, Lu J, Hu J, Shang Y (2012) Gabor-based gradient
+orientation pyramid for kinship verification under uncontrolled
+environments. In: Proceedings of the 20th ACM international
+conference on Multimedia, pp. 725–728
+
+Publisher’s note Springer Nature remains neutral with regard to
+jurisdictional claims in published maps and institutional affiliations.
+
+M. Bessaoudi et al.
+Mohcene Bessaoudi Received
+the Ph.D degree in Electronic
+Telecommunication from University of Mohammed Khider
+Biskra, Algeria in 2019 at
+the Department of Electrical
+Engineering. His research
+interests are in: image processing, feature extraction,
+face detection, tensor analysis, classification, computer
+vision, biometric techniques
+and face recognition systems.
+
+Ammar Chouchane Received
+the Ph.D degree in Electronic
+Telecommunication from University of Mohammed Khider
+Biskra, Algeria in 2016. Currently, he is a Lecturer at
+Electrical Engineering Department at university of Yahia
+Fares Medea, Algeria. His
+research interests are in image
+processing, feature extraction,
+face detection, tensor analysis, classification, computer
+vision, biometric techniques
+and face recognition systems.
+
+Abdelmalik Ouamane Received the Doctor of Science degree from University
+of Mohammed Khider Biskra,
+Algeria in 2015. Currently,
+he is a Lecturer at Electrical
+Engineering Department at the
+same university. He has been a
+reviewer for many conferences
+and journals. His research
+interests include image processing, classification, multimodal biometric and tensor
+analysis.
+
+Elhocine Boutellaa Received
+Ph.D. degree in Computer
+Science from Ecole Nationale
+Supérieure
+d’Informatique,
+Algeria. He has been working
+as research associate with
+Centre de Développement
+des Technologies Avancées
+since 2010. Currently he
+holds the position of postdoctoral researcher at Centre de
+Développment Technologie
+Avancés, Algiers, Algeria.
+His research interests include
+face analysis, biometrics and
+computer vision.
+
+
